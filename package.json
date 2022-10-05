@@ -1,0 +1,22 @@
+{
+  "name": "heroku-line",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./index.js",
+    "start": "node ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.17.1",
+    "ioredis": "^4.14.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.1"
+  },
+  "license": "ISC"
+}

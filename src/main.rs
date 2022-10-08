@@ -14,9 +14,10 @@ async fn echo(req_body: String) -> impl Responder {
 async fn manual_hello() -> impl Responder {
     HttpResponse::Ok().body("Hey there!")
 }
-
+use std::env;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let PORT:u16 = env::var("PORT").unwrap_or("8080".to_string()).parse().unwrap();
     println!("I am ready!");
     HttpServer::new(|| {
         App::new()
@@ -24,7 +25,7 @@ async fn main() -> std::io::Result<()> {
             .service(echo)
             .route("/hey", web::get().to(manual_hello))
     })
-    .bind(("0.0.0.0", 8080))?
+    .bind(("0.0.0.0", PORT))?
     .run()
     .await
 }

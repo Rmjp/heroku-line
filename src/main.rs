@@ -1,5 +1,7 @@
+mod database;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use json;
+use dotenv::dotenv;
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -31,8 +33,10 @@ async fn manual_hello() -> impl Responder {
 use std::env;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dotenv().ok();
     let PORT:u16 = env::var("PORT").unwrap_or("8080".to_string()).parse().unwrap();
     println!("I am ready!");
+    let conn = database::connec_database(env::var("DATABASE_URL").expect("DATABASE_URL. not found"));
     HttpServer::new(|| {
         App::new()
             .service(hello)

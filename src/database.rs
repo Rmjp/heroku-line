@@ -8,5 +8,3 @@ pub fn connec_database(url: String) -> PooledConn{
     println!("Successfully connected to PlanetScale!");
     return _conn;
 }
-
-pub fn 

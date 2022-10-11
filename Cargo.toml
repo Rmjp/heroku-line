@@ -8,3 +8,5 @@ actix-web = "4"
 json = "0.12.4"
 mysql = "*"
 dotenv = "*"
+serde = { version = "1.0", features = ["derive"] }
+reqwest = "*"

@@ -39,8 +39,6 @@ async fn main() -> std::io::Result<()> {
     let PORT:u16 = env::var("PORT").unwrap_or("8080".to_string()).parse().unwrap();
     println!("I am ready!");
 
-    mail::send_mail_verify(String::from("r.nakjeen@gmail.com"), String::from("123456")).await.unwrap();
-
     let conn = database::connec_database(env::var("DATABASE_URL").expect("DATABASE_URL. not found"));
     HttpServer::new(|| {
         App::new()

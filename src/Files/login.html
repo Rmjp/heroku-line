@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="/loginsubmit">
+        <label for="std_id">std_id</label>
+        <input type="text" name="std_id" id="std_id">
+        <input id="line" value="" name="line_id" style="display: none;">
+        <input type="submit" value="Login">
+    </form>
+    <script>
+        const params = new Proxy(new URLSearchParams(window.location.search), {
+            get: (searchParams, prop) => searchParams.get(prop),
+        });
+        let line_id = params.line_id;
+        document.getElementById("line").value = line_id;
+    </script>
+</body>
+</html>

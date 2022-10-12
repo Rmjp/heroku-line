@@ -1,12 +1,15 @@
 mod database;
 mod mail;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_files::NamedFile;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, HttpRequest};
 use json;
 use dotenv::dotenv;
 use std::env;
-use mysql::*;
+use std::path::PathBuf;
+use mysql;
+use serde::Deserialize;
 
-static mut pool: Option<Pool> = None;
+static mut pool: Option<mysql::Pool> = None;
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -38,8 +41,20 @@ async fn test(req_body: String) -> impl Responder {
     HttpResponse::Ok().body(json::stringify(json::object!{ fulfillmentMessages: [result] }))
 }
 
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
+#[derive(Deserialize)]
+struct Info {
+    line_id: String,
+    std_id: String,
+}
+#[get("/loginsubmit")]
+async fn loginsubmit(info: web::Query<Info>) -> impl Responder {
+    println!("{} {}", info.line_id, info.std_id);
+    HttpResponse::Ok().body("Ok")
+}
+
+async fn index(req: HttpRequest) -> Result<NamedFile, std::io::Error> {
+    let path: PathBuf = "./files/login.html".parse().unwrap();
+    Ok(NamedFile::open(path)?)
 }
 
 #[actix_web::main]
@@ -53,9 +68,9 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .service(hello)
-            .service(echo)
             .service(test)
-            .route("/hey", web::get().to(manual_hello))
+            .service(loginsubmit)
+            .route("/login", web::get().to(index))
     })
     .bind(("0.0.0.0", PORT))?
     .run()

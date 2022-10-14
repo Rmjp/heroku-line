@@ -824,6 +824,7 @@ dependencies = [
  "dotenv",
  "json",
  "mysql",
+ "rand",
  "reqwest",
  "serde",
 ]

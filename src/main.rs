@@ -42,17 +42,38 @@ async fn test(req_body: String) -> impl Responder {
 }
 
 #[derive(Deserialize)]
-struct Info {
+struct InfoLoginsubmit {
     line_id: String,
     std_id: String,
 }
-#[get("/loginsubmit")]
-async fn loginsubmit(info: web::Query<Info>) -> impl Responder {
-    println!("{} {}", info.line_id, info.std_id);
-    HttpResponse::Ok().body("Ok")
+#[post("/loginsubmit")]
+async fn loginsubmit(info: web::Json<InfoLoginsubmit>) -> impl Responder {
+    let user_mail = database::get_mail_by_std_id(& unsafe{pool.clone()}.unwrap(), &info.std_id);
+    let pin = database::rand_pin();
+    database::put_pin(& unsafe{pool.clone()}.unwrap(), &info.std_id, &pin);
+    mail::send_mail_verify(&user_mail, &pin).await.unwrap();
+    HttpResponse::Ok().body(json::stringify(json::object!{ status: "OK" }))
 }
 
-async fn index(req: HttpRequest) -> Result<NamedFile, std::io::Error> {
+#[derive(Deserialize)]
+struct InfoVerify {
+    line_id: String,
+    std_id: String,
+    pin: String,
+}
+#[post("/verify")]
+async fn verify(info: web::Json<InfoVerify>) -> impl Responder {
+    match database::check_pin(& unsafe{pool.clone()}.unwrap(), &info.std_id, &info.pin) {
+        true => {
+            database::remove_pin(& unsafe{pool.clone()}.unwrap(), &info.std_id);
+            database::put_line_id(& unsafe{pool.clone()}.unwrap(), &info.std_id, &info.line_id);
+            HttpResponse::Ok().body(json::stringify(json::object!{ status: "OK" }))
+        },
+        false => HttpResponse::Ok().body(json::stringify(json::object!{ status: "Wrong PIN" }))
+    }
+}
+
+async fn index(_req: HttpRequest) -> Result<NamedFile, std::io::Error> {
     let path: PathBuf = "./files/login.html".parse().unwrap();
     Ok(NamedFile::open(path)?)
 }

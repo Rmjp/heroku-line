@@ -11,3 +11,4 @@ dotenv = "*"
 serde = { version = "1.0", features = ["derive"] }
 reqwest = "*"
 actix-files = "*"
+rand = "*"

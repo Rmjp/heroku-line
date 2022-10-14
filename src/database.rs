@@ -11,8 +11,8 @@ pub fn connec_database(url: String) -> Pool{
 
 pub fn check_user(pool: &Pool, std_id: String) -> bool{
     let mut conn = pool.get_conn().unwrap();
-    let result = conn.exec_first::<String, _, _>("SELECT * FROM users WHERE user_id = :user_id", params!{
-        "user_id" => std_id
+    let result = conn.exec_first::<String, _, _>("SELECT * FROM user WHERE std_id = :std_id", params!{
+        "std_id" => std_id
     }).unwrap();
     match result {
         Some(_) => return true,
@@ -23,7 +23,7 @@ pub fn check_user(pool: &Pool, std_id: String) -> bool{
 pub fn get_mail_by_std_id(pool: &Pool, std_id: &String) -> String{
     let mut conn = pool.get_conn().unwrap();
     let result = conn.exec_first::<String, _, _>("SELECT email FROM std_data WHERE std_id = :std_id", params!{
-        "user_id" => std_id
+        "std_id" => std_id
     }).unwrap();
     match result {
         Some(mail) => return mail,
@@ -42,7 +42,7 @@ pub fn rand_pin() -> String{
 
 pub fn put_pin(pool: &Pool, std_id: &String, pin: &String){
     let mut conn = pool.get_conn().unwrap();
-    let result = conn.exec_first::<String, _, _>("SELECT * FROM pin WHERE std_id = :std_id", params!{
+    let result = conn.exec_first::<Row, _, _>("SELECT * FROM std_idTopin WHERE std_id = :std_id", params!{
         "std_id" => std_id
     }).unwrap();
     if result.is_some() {

@@ -13,70 +13,61 @@ static mut domain: String = String::new();
 static mut pool: Option<mysql::Pool> = None;
 
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
-}
-
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    println!("{}",req_body);
-    HttpResponse::Ok().body(req_body)
-}
-
 #[post("/test")]
 async fn test(req_body: String) -> impl Responder {
      let req_json: json::JsonValue = json::parse(&req_body).unwrap();
-    // match database::check_user(& unsafe{pool.clone()}.unwrap(), req_json["originalDetectIntentRequest"]["payload"]["data"]["source"]["userId"].to_string()) {
-    //     true => {},
-    //     false => return HttpResponse::Ok().body("false")
-    // }
-    let mut result = json::object!{
-        "payload": {
-            "line": {
-                "contents": {
-                    "contents": [
-                        {
-                            "type": "bubble",
-                            "body": {
-                                "type": "box",
-                                "contents": [
-                                    {
-                                        "wrap": true,
-                                        "text": "กรุณากรอกเลขประจำตัวนักศึกษา เพื่อเชื่อมต่อบัญชี",
-                                        "type": "text"
+    match database::check_user(& unsafe{pool.clone()}.unwrap(), req_json["originalDetectIntentRequest"]["payload"]["data"]["source"]["userId"].to_string()) {
+        true => {},
+        false => {
+            let mut result = json::object!{
+                "payload": {
+                    "line": {
+                        "contents": {
+                            "contents": [
+                                {
+                                    "type": "bubble",
+                                    "body": {
+                                        "type": "box",
+                                        "contents": [
+                                            {
+                                                "wrap": true,
+                                                "text": "กรุณากรอกเลขประจำตัวนักศึกษา เพื่อเชื่อมต่อบัญชี",
+                                                "type": "text"
+                                            }
+                                        ],
+                                        "layout": "horizontal"
+                                    },
+                                    "footer": {
+                                        "contents": [
+                                            {
+                                                "action": {
+                                                    "uri": "",
+                                                    "type": "uri",
+                                                    "label": "กดเลย"
+                                                },
+                                                "type": "button",
+                                                "style": "primary"
+                                            }
+                                        ],
+                                        "type": "box",
+                                        "layout": "horizontal"
                                     }
-                                ],
-                                "layout": "horizontal"
-                            },
-                            "footer": {
-                                "contents": [
-                                    {
-                                        "action": {
-                                            "uri": "",
-                                            "type": "uri",
-                                            "label": "กดเลย"
-                                        },
-                                        "type": "button",
-                                        "style": "primary"
-                                    }
-                                ],
-                                "type": "box",
-                                "layout": "horizontal"
-                            }
-                        }
-                    ],
-                    "type": "carousel"
+                                }
+                            ],
+                            "type": "carousel"
+                        },
+                        "altText": "This is a Flex Message",
+                        "type": "flex"
+                    }
                 },
-                "altText": "This is a Flex Message",
-                "type": "flex"
-            }
-        },
-        "platform": "LINE"
-    
-    };
-    result["payload"]["line"]["contents"]["contents"][0]["footer"]["contents"][0]["action"]["uri"] = format!("{}/login?line_id={}", unsafe{domain.clone()}, req_json["originalDetectIntentRequest"]["payload"]["data"]["source"]["userId"]).into();
-    HttpResponse::Ok().body(json::stringify(json::object!{ fulfillmentMessages: [result] }))
+                "platform": "LINE"
+            
+            };
+            result["payload"]["line"]["contents"]["contents"][0]["footer"]["contents"][0]["action"]["uri"] = format!("{}/login?line_id={}", unsafe{domain.clone()}, req_json["originalDetectIntentRequest"]["payload"]["data"]["source"]["userId"]).into();
+            return HttpResponse::Ok().body(json::stringify(json::object!{ fulfillmentMessages: [result] }));
+        }
+    }
+    HttpResponse::Ok().body(req_body)
 }
 
 #[derive(Deserialize)]
@@ -116,6 +107,11 @@ async fn index(_req: HttpRequest) -> Result<NamedFile, std::io::Error> {
     Ok(NamedFile::open(path)?)
 }
 
+async fn error(_req: HttpRequest) -> Result<NamedFile, std::io::Error> {
+    let path: PathBuf = "./files/error.html".parse().unwrap();
+    Ok(NamedFile::open(path)?)
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
@@ -129,10 +125,11 @@ async fn main() -> std::io::Result<()> {
     println!("I am ready!");
     HttpServer::new(|| {
         App::new()
-            .service(hello)
             .service(test)
             .service(loginsubmit)
             .route("/login", web::get().to(index))
+            .service(verify)
+            .default_service(web::get().to(error))
     })
     .bind(("0.0.0.0", PORT))?
     .run()

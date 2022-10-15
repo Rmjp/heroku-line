@@ -1,0 +1,102 @@
+#login{
+    display: none;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #ccc;
+    margin: auto auto;
+    padding: 20px;
+    width: 300px;
+}
+#login .button{
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #ccc;
+    color: #000;
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    text-align: center;
+    width: 100px;
+}
+#login .button:hover{
+    background: #ccc;
+    border: 1px solid #000;
+    box-shadow: 0 0 5px #000;
+    color: #000;
+}
+#login .button:active{
+    background: #000;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 5px #ccc;
+    color: #fff;
+}
+#login label{
+    display: block;
+    margin: 10px auto;
+    text-align: center;
+    width: 100%;
+}
+#login input{
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #ccc;
+    display: block;
+    margin: 10px auto;
+    padding: 7px 0px;
+    text-align: center;
+    width: 100%;
+}
+
+#verify{
+    display: none;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #ccc;
+    margin: auto auto;
+    padding: 20px;
+    width: 300px;
+}
+#verify .button{
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #ccc;
+    color: #000;
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    text-align: center;
+    width: 100px;
+}
+#verify .button:hover{
+    background: #ccc;
+    border: 1px solid #000;
+    box-shadow: 0 0 5px #000;
+    color: #000;
+}
+#verify .button:active{
+    background: #000;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 5px #ccc;
+    color: #fff;
+}
+#verify label{
+    display: block;
+    margin: 10px auto;
+    text-align: center;
+    width: 100%;
+}
+#verify input{
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #ccc;
+    display: block;
+    margin: 10px auto;
+    padding: 7px 0px;
+    text-align: center;
+    width: 100%;
+}
+

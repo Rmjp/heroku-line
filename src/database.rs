@@ -60,7 +60,7 @@ pub fn put_pin(pool: &Pool, std_id: &String, pin: &String){
 
 pub fn check_pin(pool: &Pool, std_id: &String, pin: &String) -> bool{
     let mut conn = pool.get_conn().unwrap();
-    let result = conn.exec_first::<String, _, _>("SELECT * FROM std_idTopin WHERE std_id = :std_id AND pin = :pin", params!{
+    let result = conn.exec_first::<Row, _, _>("SELECT * FROM std_idTopin WHERE std_id = :std_id AND pin = :pin", params!{
         "std_id" => std_id,
         "pin" => pin
     }).unwrap();

@@ -4,21 +4,63 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Document</title>
 </head>
 <body>
-    <label for="std_id">std_id</label>
-    <input type="number" name="std_id" id="std_id">
-    <input id="line" value="" name="line_id" style="display: none;">
-    <input type="submit" value="Login" onclick="on_submit_std_id()"">
+    <div id="login">
+        <label for="std_id">เลขประจำตัวนิสิต</label>
+        <input type="text" pattern="[0-9]*" inputmode="numeric" name="std_id" id="std_id" placeholder="6510501111">
+        <input id="line" value="" name="line_id" style="display: none;">
+        <input class="button" type="submit" value="Login" onclick="on_submit_std_id()"">
+    </div>
+    <div id="verify">
+        <p id="status">ส่งรหัสไปทางเมลแล้ว โปรดตรวจสอบเมลขยะ</p>
+        <label for="verify_code">Verify code</label>
+        <input type="text" name="verify_code" id="verify_code">
+        <input type="submit" value="Verify" class="button" onclick="on_submit_verify_code()">
+    </div>
     <script>
         const params = new Proxy(new URLSearchParams(window.location.search), {
             get: (searchParams, prop) => searchParams.get(prop),
         });
         let line_id = params.line_id;
         document.getElementById("line").value = line_id;
+        
+        function setInputFilter(textbox, inputFilter, errMsg) {
+            ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop", "focusout"].forEach(function(event) {
+                textbox.addEventListener(event, function(e) {
+                if (inputFilter(this.value)) {
+                    // Accepted value
+                    if (["keydown","mousedown","focusout"].indexOf(e.type) >= 0){
+                    this.classList.remove("input-error");
+                    this.setCustomValidity("");
+                    }
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    // Rejected value - restore the previous one
+                    this.classList.add("input-error");
+                    this.setCustomValidity(errMsg);
+                    this.reportValidity();
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                } else {
+                    // Rejected value - nothing to restore
+                    this.value = "";
+                }
+                });
+            });
+            }
+            setInputFilter(document.getElementById("std_id"), function(value) {
+                return /^\d*?\d*$/.test(value) && value.length <= 10; // Allow digits and '.' only, using a RegExp
+            }, "Only digits are allowed and max length is 10");
+            setInputFilter(document.getElementById("verify_code"), function(value) {
+                return /^\d*?\d*$/.test(value) && value.length <= 6; // Allow digits and '.' only, using a RegExp
+            }, "Only digits are allowed and max length is 6");
 
-        async function postData(url = '', data = {}) {
+            async function postData(url = '', data = {}) {
         // Default options are marked with *
             const response = await fetch(url, {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -36,12 +78,30 @@
             return response.json(); // parses JSON response into native JavaScript objects
         }
         
-        function on_submit_std_id(){
+        async function on_submit_std_id(){
             let std_id = document.getElementById("std_id").value;
-            postData('/loginsubmit', {std_id: std_id, line_id: line_id})
-            .then(data => {
-                console.log(data); // JSON data parsed by `data.json()` call
-            });
+            let result = await postData('/loginsubmit', {std_id: std_id, line_id: line_id});
+            if (result["status"] == "OK"){
+                document.getElementById("login").style.display = "none";
+                document.getElementById("verify").style.display = "block";
+            }
+            else{
+                alert("Error");
+                window.location.href = "/error";
+            }
+        }
+
+        async function on_submit_verify_code(){
+            let verify_code = document.getElementById("verify_code").value;
+            let std_id = document.getElementById("std_id").value;
+            let result = await postData('/verify', {pin: verify_code, line_id: line_id, std_id: std_id});
+            if (result["status"] == "OK"){
+                window.location.href = "https://line.me/R/";
+            }
+            else{
+                alert("Error");
+                window.location.href = "/error";
+            }
         }
 
     </script>

@@ -10,7 +10,7 @@
     <div id="error">
         <p id="status">เกิดข้อผิดพลาด</p>
         <p id="error_msg"></p>
-        <a href="login">กลับไปหน้า Login</a>
+        <p >โปรดติดต่อผู้ดูแล</p>
     </div>
     <style>
         #error {
@@ -20,9 +20,18 @@
             justify-content: center;
             height: 100vh;
         }
-        #error a {
-            margin-top: 20px;
+        #status {
+            font-size: 30px;
+            font-weight: bold;
+            color: red;
         }
     </style>
+    <script>
+         const params = new Proxy(new URLSearchParams(window.location.search), {
+            get: (searchParams, prop) => searchParams.get(prop),
+        });
+        let error_msg = params.error_msg;
+        document.getElementById("error_msg").innerText = error_msg;
+    </script>
 </body>
 </html>

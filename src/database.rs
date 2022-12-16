@@ -1,6 +1,8 @@
 use mysql::*;
 use mysql::prelude::*;
 use rand::Rng;
+use chrono;
+// use time;
 
 pub fn connec_database(url: String) -> Pool{
     let builder = OptsBuilder::from_opts(Opts::from_url(&url).unwrap());
@@ -40,22 +42,33 @@ pub fn rand_pin() -> String{
     pin
 }
 
-pub fn put_pin(pool: &Pool, std_id: &String, pin: &String){
+pub fn put_pin(pool: &Pool, std_id: &String, pin: &String) -> core::result::Result<(), String>{
     let mut conn = pool.get_conn().unwrap();
     let result = conn.exec_first::<Row, _, _>("SELECT * FROM std_idTopin WHERE std_id = :std_id", params!{
         "std_id" => std_id
     }).unwrap();
     if result.is_some() {
+        let mut row = result.unwrap();
+        let time: chrono::NaiveDateTime  = row.take("time").unwrap();
+        // let num: u32 = row.take("num").unwrap();
+        let now = chrono::Local::now().naive_local();
+        let dur = (now-time).num_seconds();
+        if dur < 60*3 {
+            return Err("Please wait 3 minutes".to_string());
+        }
         conn.exec_drop("UPDATE std_idTopin SET pin = :pin WHERE std_id = :std_id", params!{
             "pin" => pin,
             "std_id" => std_id
         }).unwrap();
     } else {
-        conn.exec_drop("INSERT INTO std_idTopin (std_id, pin) VALUES (:std_id, :pin)", params!{
+        conn.exec_drop("INSERT INTO std_idTopin (std_id, pin, time, num) VALUES (:std_id, :pin, :time, :num)", params!{
             "std_id" => std_id,
-            "pin" => pin
+            "pin" => pin,
+            "time" => chrono::Local::now().naive_local(),
+            "num" => 0
         }).unwrap();
     }
+    Ok(())
 }
 
 pub fn check_pin(pool: &Pool, std_id: &String, pin: &String) -> bool{
@@ -65,7 +78,9 @@ pub fn check_pin(pool: &Pool, std_id: &String, pin: &String) -> bool{
         "pin" => pin
     }).unwrap();
     match result {
-        Some(_) => return true,
+        Some(_) => {
+            return true;
+        },
         None => return false
     }
 }

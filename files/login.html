@@ -26,6 +26,9 @@
         });
         let line_id = params.line_id;
         document.getElementById("line").value = line_id;
+        if (line_id == null){
+            window.location.href = "error?error_msg=ไม่พบ Line ID";
+        }
         
         function setInputFilter(textbox, inputFilter, errMsg) {
             ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop", "focusout"].forEach(function(event) {
@@ -87,7 +90,7 @@
             }
             else{
                 alert("Error");
-                window.location.href = "/error";
+                window.location.href = "/error?error_msg=" + result["status"];
             }
         }
 
